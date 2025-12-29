@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://appsmarttechnology.github.io/sitemap.xml
