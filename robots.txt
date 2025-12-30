@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://appsmarttechnology.github.io/sitemap.xml
+Sitemap: https://appsmarttechnology.rap-infinite.online/sitemap.xml
