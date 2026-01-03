@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://appser.rap-infinite.online/sitemap.xml
+Sitemap: https://appsem.rap-infinite.online/sitemap.xml
