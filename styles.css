@@ -137,10 +137,22 @@ body {
 /* ===== GRID DE APPS ===== */
 .apps-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+
+  /* 6 columnas fijas */
+  grid-template-columns: repeat(6, minmax(180px, 1fr));
+
   gap: 14px;
   margin-top: 10px;
+
+  /* SCROLL */
+  max-height: 520px;
+  overflow-y: auto;   /* scroll vertical */
+  overflow-x: auto;   /* scroll horizontal */
+
+  padding-bottom: 6px; /* espacio scroll horizontal */
+  padding-right: 6px;  /* espacio scroll vertical */
 }
+
 
 /* ===== ESTADO VACÍO ===== */
 .empty-state {
