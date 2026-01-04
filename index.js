@@ -5,11 +5,14 @@ const searchInput = document.getElementById("searchInput");
 const chips = document.querySelectorAll(".chip");
 document.getElementById("year").textContent = new Date().getFullYear();
 
+let allApps = [];
+let currentCat = "all";
+
 // ====== Cargar apps ======
 db.collection("apps").orderBy("fecha", "desc").onSnapshot(
   snap => {
-    const allApps = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-    renderApps(allApps);
+    allApps = snap.docs.map(d => ({ ...d.data(), id: d.id }));
+    renderApps();
   },
   () => {
     emptyState.style.display = "block";
@@ -18,7 +21,7 @@ db.collection("apps").orderBy("fecha", "desc").onSnapshot(
 );
 
 // ====== Render lista ======
-function renderApps(allApps) {
+function renderApps() {
   const q = (searchInput.value || "").toLowerCase();
   appsGrid.innerHTML = "";
 
@@ -66,8 +69,8 @@ function renderApps(allApps) {
     `;
 
     card.onclick = () => {
-      // Redirigir a la página individual de la app
-      window.location.href = `app.html?id=${app.id}`;
+      // Redirigir a la página de detalles
+      window.location.href = `app-detail.html?id=${app.id}`;
     };
     
     appsGrid.appendChild(card);
@@ -75,24 +78,13 @@ function renderApps(allApps) {
 }
 
 // ====== Eventos ======
-let currentCat = "all";
-
-searchInput.addEventListener("input", () => {
-  db.collection("apps").orderBy("fecha", "desc").get().then(snap => {
-    const allApps = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-    renderApps(allApps);
-  });
-});
+searchInput.addEventListener("input", renderApps);
 
 chips.forEach(chip => {
   chip.onclick = () => {
     document.querySelector(".chip.active")?.classList.remove("active");
     chip.classList.add("active");
     currentCat = chip.dataset.cat;
-    
-    db.collection("apps").orderBy("fecha", "desc").get().then(snap => {
-      const allApps = snap.docs.map(d => ({ ...d.data(), id: d.id }));
-      renderApps(allApps);
-    });
+    renderApps();
   };
 });
