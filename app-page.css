@@ -71,8 +71,6 @@
 .overlay-header p {
   color: #64748b;
 }
-
-
 .info-title,
 .review-time {
   color: #9ca3af;
@@ -82,7 +80,7 @@
   
 .categories-bar {
   position: fixed;
-  top: 72px; /* debajo del header */
+  top: 120px; /* debajo del header */
   left: 0;
   right: 0;
   z-index: 900;
