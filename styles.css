@@ -177,3 +177,13 @@ body {
     padding: 14px 12px 30px;
   }
 }
+
+
+/* Tamaño correcto de iconos de apps */
+.apps-grid img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 14px;
+  background: #020617;
+}
