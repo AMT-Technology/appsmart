@@ -69,15 +69,26 @@
 }
 
 .overlay-header p {
-  margin: 5px 0;
+.overlay-header p {
   color: #64748b;
-  font-size: 0.95rem;
-  
-  .info-title,
- .review-time {
+}
+
+.info-title,
+.review-time {
   color: #9ca3af;
 }
 
+
+  
+.categories-bar {
+  position: sticky;
+  top: 120px; /* altura real del header */
+  z-index: 50;
+  background: #020617;
+}
+
+
+  
 /* Botones de acción */
 .install-share-row {
   display: flex;
@@ -248,14 +259,13 @@
 
 .info-value {
   font-size: 1rem;
-  margin: 0;
-  font-weight: 500;
+}
 
-  
-  .review-text,
-  .detail-desc {
+.review-text,
+.detail-desc {
   color: #e5e7eb;
 }
+
 .info-value a {
   color: #3b82f6;
   text-decoration: none;
