@@ -69,9 +69,9 @@
 }
 
 .overlay-header p {
-.overlay-header p {
   color: #64748b;
 }
+
 
 .info-title,
 .review-time {
@@ -81,16 +81,17 @@
 
   
 .categories-bar {
-  position: sticky;
-  top: 72px; /* altura real del header */
+  position: fixed;
+  top: 72px; /* debajo del header */
+  left: 0;
+  right: 0;
   z-index: 900;
   background: #020617;
+  border-bottom: 1px solid rgba(31,41,55,0.8);
 }
-
-.app-detail-page {
-  padding-top: 80px;
+.store-main {
+  padding-top: 140px; /* header (72) + categorías (~60) */
 }
-
 
   
 /* Botones de acción */
