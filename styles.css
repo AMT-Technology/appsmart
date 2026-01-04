@@ -177,7 +177,15 @@ body {
   object-fit: cover;
   background: #020617;
   flex-shrink: 0;
+
+  /* Añadir estas líneas para asegurar que la imagen no crezca */
+  max-width: 64px;
+  max-height: 64px;
+  min-width: 64px;
+  min-height: 64px;
 }
+
+
 
 .app-body {
   flex: 1;
