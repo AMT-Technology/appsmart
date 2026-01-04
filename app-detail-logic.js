@@ -1,23 +1,9 @@
-// app-detail.js - Lógica para la página dinámica de detalles de app
-
 // ====== Referencias DOM ======
-const appContainer = document.getElementById("appContainer");
+const detailContent = document.getElementById("detailContent");
 let currentApp = null;
 let reviewStarsSelected = 0;
 
-// ====== LocalStorage ======
-const VOTES_KEY = "appser_votes";
-
-function getVotes() {
-  try { return JSON.parse(localStorage.getItem(VOTES_KEY) || "{}"); } 
-  catch { return {}; }
-}
-
-function saveVotes(v) {
-  localStorage.setItem(VOTES_KEY, JSON.stringify(v));
-}
-
-// ====== Obtener ID de la app de la URL ======
+// ====== Obtener ID de la URL ======
 function getAppIdFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get('id');
@@ -36,76 +22,72 @@ async function cargarApp() {
     const doc = await db.collection("apps").doc(appId).get();
     
     if (!doc.exists) {
-      appContainer.innerHTML = `
-        <div class="error-container">
-          <h2>App no encontrada</h2>
-          <p>La aplicación que buscas no existe o ha sido eliminada.</p>
-          <button class="btn-back" onclick="window.location.href='index.html'">← Volver al inicio</button>
-        </div>
-      `;
+      mostrarError("App no encontrada");
       return;
     }
     
     currentApp = { ...doc.data(), id: doc.id };
-    renderizarApp(currentApp);
-    
-    // Actualizar título y meta tags dinámicamente
+    renderAppDetails(currentApp);
     actualizarMetaTags(currentApp);
     
   } catch (error) {
     console.error("Error cargando app:", error);
-    appContainer.innerHTML = `
-      <div class="error-container">
-        <h2>Error al cargar la app</h2>
-        <p>Hubo un problema al cargar la información. Intenta nuevamente.</p>
-        <button class="btn-back" onclick="window.location.href='index.html'">← Volver al inicio</button>
-      </div>
-    `;
+    mostrarError("Error de conexión");
   }
 }
 
-// ====== Actualizar meta tags para SEO ======
+function mostrarError(mensaje) {
+  detailContent.innerHTML = `
+    <div style="text-align: center; padding: 50px;">
+      <h2>${mensaje}</h2>
+      <button class="btn-back" onclick="window.location.href='index.html'">Volver al inicio</button>
+    </div>
+  `;
+}
+
 function actualizarMetaTags(app) {
-  document.title = `${app.nombre} — Appser Store | Descarga ${app.nombre} para Android`;
+  document.title = `${app.nombre} — Appser Store`;
   
+  // Actualizar meta description
   const metaDesc = document.querySelector('meta[name="description"]');
   if (metaDesc) {
     metaDesc.content = `Descarga ${app.nombre} para Android desde Appser Store. ${app.descripcion?.substring(0, 150) || ''}`;
   }
-  
-  // Open Graph
-  const ogTitle = document.querySelector('meta[property="og:title"]');
-  const ogDesc = document.querySelector('meta[property="og:description"]');
-  const ogImage = document.querySelector('meta[property="og:image"]');
-  const ogUrl = document.querySelector('meta[property="og:url"]');
-  
-  if (ogTitle) ogTitle.content = `${app.nombre} — Appser Store`;
-  if (ogDesc) ogDesc.content = app.descripcion?.substring(0, 200) || '';
-  if (ogImage) ogImage.content = app.imagen || 'https://appsem.rap-infinite.online/logo.webp';
-  if (ogUrl) ogUrl.content = window.location.href;
 }
 
-// ====== Renderizar app ======
-function renderizarApp(app) {
-  const votes = getVotes();
+// ====== Renderizar detalles de la app ======
+function renderAppDetails(app) {
+  const votes = JSON.parse(localStorage.getItem("appsmart_votes") || "{}");
   const myVote = votes[app.id] || {};
-  
+
   const ratingAvg = app.ratingAvg || 0;
   const ratingCount = app.ratingCount || 0;
   const descargas = app.descargasReales ?? app.descargas ?? 0;
-  
+  const likes = app.likes || 0;
+
   let breakdown = app.starsBreakdown || {1:0,2:0,3:0,4:0,5:0};
   let total = Object.values(breakdown).reduce((a,b)=>a+b,0);
-  if (!total && ratingCount) { breakdown = {1:0,2:0,3:0,4:0,5:ratingCount}; total = ratingCount; }
-  
-  const screenshotsHTML = app.imgSecundarias && app.imgSecundarias.length > 0 ? `
-    <h2>Capturas de pantalla</h2>
-    <div class="screenshots-row">
-      ${app.imgSecundarias.map(img => `<img src="${img}" alt="Captura de ${app.nombre}" loading="lazy">`).join('')}
-    </div>
-  ` : '';
-  
-  appContainer.innerHTML = `
+  if (!total && ratingCount) { 
+    breakdown = {1:0,2:0,3:0,4:0,5:ratingCount}; 
+    total = ratingCount; 
+  }
+
+  // Función para estrellas estáticas
+  function renderStarsStatic(rating) {
+    const full = Math.floor(rating);
+    const half = rating % 1 >= 0.25 && rating % 1 < 0.75 ? 1 : 0;
+    const empty = 5 - full - half;
+    let stars = '';
+    for (let i = 0; i < full; i++) stars += '<span class="star-static">★</span>';
+    if (half) stars += '<span class="star-static">⯨</span>';
+    for (let i = 0; i < empty; i++) stars += '<span class="star-static">☆</span>';
+    return stars;
+  }
+
+  // HTML del overlay
+  const html = `
+    <button id="detailClose" class="overlay-close" onclick="window.history.back()">✕</button>
+
     <div class="overlay-header">
       <img id="detailIcon" class="overlay-icon" src="${app.imagen}" alt="${app.nombre}" loading="lazy">
       <div>
@@ -120,23 +102,23 @@ function renderizarApp(app) {
       <button id="installBtn" class="install-btn">
         <img src="assets/icons/descargar.png" alt="Descarga Directa">
       </button>
-      
+
       ${app.playstoreUrl ? `<button id="playstoreBtn" class="playstore-btn">
         <img src="assets/icons/playstore.png" alt="Play Store">
       </button>` : ''}
-      
+
       ${app.uptodownUrl ? `<button id="uptodownBtn" class="uptodown-btn">
         <img src="assets/icons/uptodown.png" alt="Uptodown">
       </button>` : ''}
-      
+
       ${app.megaUrl ? `<button id="megaBtn" class="mega-btn">
         <img src="assets/icons/mega.png" alt="Mega">
       </button>` : ''}
-      
+
       ${app.mediafireUrl ? `<button id="mediafireBtn" class="mediafire-btn">
         <img src="assets/icons/mediafire.png" alt="Mediafire">
       </button>` : ''}
-      
+
       <button id="shareBtn" class="share-btn">
         <img src="assets/icons/compartir.png" alt="Compartir">
       </button>
@@ -144,10 +126,10 @@ function renderizarApp(app) {
 
     <p id="detailStats" class="detail-stats">
       Descargas: ${descargas.toLocaleString("es-ES")} • 
-      Likes: ${(app.likes || 0).toLocaleString("es-ES")}
+      Likes: ${likes.toLocaleString("es-ES")}
     </p>
 
-    <!-- Rating -->
+    <!-- Bloque estrellas + like -->
     <div class="rating-block">
       <p id="ratingLabel" class="rating-label">
         Valoración: ${ratingAvg.toFixed(1)} (${ratingCount} votos)
@@ -156,18 +138,18 @@ function renderizarApp(app) {
         ${renderStarsStatic(ratingAvg)}
       </div>
       <button id="likeBtn" class="like-btn" ${myVote.liked ? 'disabled' : ''}>
-        ${myVote.liked ? '❤️ Ya te gusta' : '❤️ Me gusta'} (${app.likes || 0})
+        ${myVote.liked ? '❤️ Ya te gusta' : '❤️ Me gusta'} (${likes})
       </button>
     </div>
 
-    <!-- Gráfico de valoraciones -->
+    <!-- Resumen valoraciones -->
     <h2>Valoraciones y reseñas</h2>
     <div class="stars-graph">
       <div class="stars-left">
         <div id="ratingBig" class="rating-big">${ratingAvg.toFixed(1)}</div>
         <div id="ratingTotal" class="rating-total">${total} reseñas</div>
       </div>
-      
+
       <div class="stars-bars">
         ${[5,4,3,2,1].map(star => `
           <div class="bar-row">
@@ -178,73 +160,73 @@ function renderizarApp(app) {
       </div>
     </div>
 
-    <!-- Información de la App -->
+    <!-- INFORMACIÓN DE LA APP -->
     <h2>Información de la app</h2>
     <div class="info-grid">
       <div class="info-box">
         <span class="info-icon">🌐</span>
         <div>
           <p class="info-title">Idioma</p>
-          <p class="info-value">${app.idioma || '—'}</p>
+          <p id="infoIdioma" class="info-value">${app.idioma || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">🔢</span>
         <div>
           <p class="info-title">Versión</p>
-          <p class="info-value">${app.version || '—'}</p>
+          <p id="infoVersion" class="info-value">${app.version || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">🏷️</span>
         <div>
           <p class="info-title">Licencia</p>
-          <p class="info-value">${app.tipo || '—'}</p>
+          <p id="infoTipo" class="info-value">${app.tipo || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">📱</span>
         <div>
           <p class="info-title">Sistema operativo</p>
-          <p class="info-value">${app.sistemaOperativo || '—'}</p>
+          <p id="infoSO" class="info-value">${app.sistemaOperativo || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">⚙️</span>
         <div>
           <p class="info-title">Requisitos del sistema</p>
-          <p class="info-value">${app.requisitos || '—'}</p>
+          <p id="infoReq" class="info-value">${app.requisitos || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">📅</span>
         <div>
           <p class="info-title">Actualización</p>
-          <p class="info-value">${app.fechaActualizacion ? new Date(app.fechaActualizacion).toLocaleDateString('es-ES') : '—'}</p>
+          <p id="infoFechaAct" class="info-value">${app.fechaActualizacion ? new Date(app.fechaActualizacion).toLocaleDateString('es-ES') : '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">🔞</span>
         <div>
           <p class="info-title">Edad recomendada</p>
-          <p class="info-value">${app.edad || '—'}</p>
+          <p id="infoEdad" class="info-value">${app.edad || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">📢</span>
         <div>
           <p class="info-title">Anuncios</p>
-          <p class="info-value">${app.anuncios === 'si' ? 'Sí' : app.anuncios === 'no' ? 'No' : '—'}</p>
+          <p id="infoAnuncios" class="info-value">${app.anuncios === 'si' ? 'Sí' : app.anuncios === 'no' ? 'No' : '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">🔗</span>
         <div>
@@ -254,28 +236,28 @@ function renderizarApp(app) {
           </p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">📦</span>
         <div>
           <p class="info-title">Tamaño del APK</p>
-          <p class="info-value">${app.size || '—'}</p>
+          <p id="infoTamañoApk" class="info-value">${app.size || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">🆔</span>
         <div>
           <p class="info-title">Package Name</p>
-          <p class="info-value">${app.packageName || '—'}</p>
+          <p id="infoPackageName" class="info-value">${app.packageName || '—'}</p>
         </div>
       </div>
-      
+
       <div class="info-box">
         <span class="info-icon">⬇️</span>
         <div>
           <p class="info-title">Descargas</p>
-          <p class="info-value">${descargas.toLocaleString('es-ES')}</p>
+          <p id="infoDescargas" class="info-value">${descargas.toLocaleString('es-ES')}</p>
         </div>
       </div>
     </div>
@@ -283,7 +265,12 @@ function renderizarApp(app) {
     <h2>Descripción</h2>
     <p id="detailDesc" class="detail-desc">${app.descripcion || ''}</p>
 
-    ${screenshotsHTML}
+    ${app.imgSecundarias && app.imgSecundarias.length > 0 ? `
+    <h2>Capturas de pantalla</h2>
+    <div id="detailScreens" class="screenshots-row">
+      ${app.imgSecundarias.map(img => `<img src="${img}" alt="Captura" loading="lazy">`).join('')}
+    </div>
+    ` : ''}
 
     <h2>Reseñas de usuarios</h2>
     
@@ -301,67 +288,50 @@ function renderizarApp(app) {
     <!-- Lista reseñas -->
     <div id="reviewsList" class="reviews-list"></div>
   `;
-  
+
+  detailContent.innerHTML = html;
+
   // Inicializar eventos
   inicializarEventos(app);
   renderReviewStars();
   loadReviews(app.id);
 }
 
-// ====== Render estrellas estáticas ======
-function renderStarsStatic(rating) {
-  const full = Math.floor(rating);
-  const half = rating % 1 >= 0.25 && rating % 1 < 0.75 ? 1 : 0;
-  const empty = 5 - full - half;
-  let stars = '';
-  
-  for (let i = 0; i < full; i++) stars += '<span class="star-static">★</span>';
-  if (half) stars += '<span class="star-static">⯨</span>';
-  for (let i = 0; i < empty; i++) stars += '<span class="star-static">☆</span>';
-  
-  return stars;
-}
-
 // ====== Inicializar eventos ======
 function inicializarEventos(app) {
-  // Descargar APK
-  document.getElementById('installBtn').onclick = () => {
-    if (!app.apk) {
-      alert("🚫 No hay archivo disponible.");
-      return;
-    }
-    
-    const btn = document.getElementById('installBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<img src="assets/icons/descargar.png" alt="Descargando...">';
-    
-    // Incrementar contador de descargas
-    db.collection("apps").doc(app.id)
-      .update({ descargasReales: firebase.firestore.FieldValue.increment(1) })
-      .then(() => {
-        // Actualizar localmente
-        app.descargasReales = (app.descargasReales || 0) + 1;
-        document.getElementById('detailStats').textContent = 
-          `Descargas: ${app.descargasReales.toLocaleString("es-ES")} • Likes: ${(app.likes || 0).toLocaleString("es-ES")}`;
-        
-        // Abrir enlace de descarga
+  // Botón de descarga principal
+  const installBtn = document.getElementById('installBtn');
+  if (installBtn) {
+    installBtn.onclick = () => {
+      if (!app.apk) {
+        alert("🚫 No hay archivo disponible.");
+        return;
+      }
+      
+      installBtn.disabled = true;
+      installBtn.innerHTML = '<img src="assets/icons/descargar.png" alt="Descargando...">';
+      
+      // Incrementar contador
+      db.collection("apps").doc(app.id).update({
+        descargasReales: firebase.firestore.FieldValue.increment(1)
+      }).then(() => {
         window.open(app.apk, '_blank');
-        
         setTimeout(() => {
-          btn.disabled = false;
-          btn.innerHTML = '<img src="assets/icons/descargar.png" alt="Descarga Directa">';
+          installBtn.disabled = false;
+          installBtn.innerHTML = '<img src="assets/icons/descargar.png" alt="Descarga Directa">';
         }, 1000);
       });
-  };
-  
-  // Botones adicionales
+    };
+  }
+
+  // Botones extra
   const botones = [
     {id: 'playstoreBtn', url: app.playstoreUrl},
     {id: 'uptodownBtn', url: app.uptodownUrl},
     {id: 'megaBtn', url: app.megaUrl},
     {id: 'mediafireBtn', url: app.mediafireUrl},
   ];
-  
+
   botones.forEach(({id, url}) => {
     const btn = document.getElementById(id);
     if (btn && url) {
@@ -371,53 +341,50 @@ function inicializarEventos(app) {
       btn.style.display = 'none';
     }
   });
-  
-  // Compartir
-  document.getElementById('shareBtn').onclick = () => {
-    const url = window.location.href;
-    const title = app.nombre;
-    const text = app.descripcion?.substring(0, 100) || '';
-    
-    if (navigator.share) {
-      navigator.share({ title, text, url });
-    } else {
-      navigator.clipboard.writeText(url);
-      alert('¡Enlace copiado al portapapeles!');
-    }
-  };
-  
-  // Like
-  document.getElementById('likeBtn').onclick = () => handleLike(app);
-}
 
-// ====== Likes ======
-function handleLike(app) {
-  const votes = getVotes();
-  const myVote = votes[app.id] || {};
-  if (myVote.liked) return;
-  
-  db.collection("apps").doc(app.id)
-    .update({ likes: firebase.firestore.FieldValue.increment(1) })
-    .then(() => {
-      myVote.liked = true;
-      votes[app.id] = myVote;
-      saveVotes(votes);
+  // Compartir
+  const shareBtn = document.getElementById('shareBtn');
+  if (shareBtn) {
+    shareBtn.onclick = () => {
+      const url = window.location.href;
+      const title = app.nombre;
+      const text = app.descripcion?.substring(0, 100) || '';
       
-      app.likes = (app.likes || 0) + 1;
-      const btn = document.getElementById('likeBtn');
-      btn.textContent = `❤️ Ya te gusta (${app.likes})`;
-      btn.disabled = true;
+      if (navigator.share) {
+        navigator.share({ title, text, url });
+      } else {
+        navigator.clipboard.writeText(url);
+        alert('¡Enlace copiado al portapapeles!');
+      }
+    };
+  }
+
+  // Like
+  const likeBtn = document.getElementById('likeBtn');
+  if (likeBtn) {
+    likeBtn.onclick = () => {
+      const votes = JSON.parse(localStorage.getItem("appsmart_votes") || "{}");
+      if (votes[app.id] && votes[app.id].liked) return;
       
-      document.getElementById('detailStats').textContent = 
-        `Descargas: ${(app.descargasReales || 0).toLocaleString("es-ES")} • Likes: ${app.likes.toLocaleString("es-ES")}`;
-    });
+      db.collection("apps").doc(app.id).update({
+        likes: firebase.firestore.FieldValue.increment(1)
+      }).then(() => {
+        votes[app.id] = { liked: true };
+        localStorage.setItem("appsmart_votes", JSON.stringify(votes));
+        
+        likeBtn.textContent = `❤️ Ya te gusta (${(app.likes || 0) + 1})`;
+        likeBtn.disabled = true;
+      });
+    };
+  }
 }
 
 // ====== Reseñas ======
 function renderReviewStars() {
   const container = document.getElementById('reviewStars');
-  container.innerHTML = '';
+  if (!container) return;
   
+  container.innerHTML = '';
   for (let i = 1; i <= 5; i++) {
     const btn = document.createElement('button');
     btn.textContent = '☆';
@@ -437,11 +404,12 @@ function setReviewStars(n) {
 
 function loadReviews(appId) {
   const container = document.getElementById('reviewsList');
+  if (!container) return;
+  
   container.innerHTML = '<p>Cargando reseñas...</p>';
   
   db.collection("apps").doc(appId).collection("reviews")
     .orderBy("timestamp", "desc")
-    .limit(50)
     .get()
     .then(snap => {
       container.innerHTML = '';
@@ -479,7 +447,7 @@ document.addEventListener('click', function(e) {
 function handleSendReview() {
   if (!currentApp) return;
   
-  const text = document.getElementById('reviewText').value.trim();
+  const text = document.getElementById('reviewText')?.value.trim() || '';
   if (reviewStarsSelected === 0) {
     alert("Selecciona una puntuación.");
     return;
@@ -505,7 +473,7 @@ function handleSendReview() {
     stars: reviewStarsSelected, 
     comment: text, 
     timestamp: Date.now(),
-    userId: 'anonymous' // Podrías implementar autenticación después
+    userId: 'anonymous'
   });
   
   batch.update(appRef, { 
@@ -516,38 +484,23 @@ function handleSendReview() {
   
   batch.commit().then(() => {
     // Limpiar formulario
-    document.getElementById('reviewText').value = '';
+    const reviewText = document.getElementById('reviewText');
+    if (reviewText) reviewText.value = '';
     reviewStarsSelected = 0;
     renderReviewStars();
-    
-    // Actualizar datos locales
-    currentApp.ratingAvg = newAvg;
-    currentApp.ratingCount = newCount;
-    currentApp.starsBreakdown = breakdown;
     
     // Recargar reviews
     loadReviews(app.id);
     
-    // Actualizar UI
-    document.getElementById('ratingLabel').textContent = 
-      `Valoración: ${newAvg.toFixed(1)} (${newCount} votos)`;
-    document.getElementById('ratingBig').textContent = newAvg.toFixed(1);
-    document.getElementById('ratingTotal').textContent = `${newCount} reseñas`;
-    
-    // Actualizar barras
-    [5,4,3,2,1].forEach(star => {
-      const percent = newCount ? (breakdown[star] / newCount) * 100 : 0;
-      document.getElementById(`bar${star}`).style.width = percent + "%";
-    });
-    
     alert("¡Tu reseña fue publicada!");
   }).catch(error => {
     console.error("Error enviando reseña:", error);
-    alert("Error al enviar la reseña. Intenta nuevamente.");
+    alert("Error al enviar la reseña.");
   });
 }
 
-// ====== Inicializar cuando el DOM esté listo ======
+// ====== Inicializar ======
 document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('year').textContent = new Date().getFullYear();
   cargarApp();
 });
