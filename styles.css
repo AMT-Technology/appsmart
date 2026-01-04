@@ -148,15 +148,20 @@ body {
 
   gap: 14px;
   margin-top: 10px;
-
-  /* SCROLL */
-  max-height: 520px;
-  overflow-y: auto;   /* scroll vertical */
-  overflow-x: auto;   /* scroll horizontal */
-
-  padding-bottom: 6px; /* espacio scroll horizontal */
-  padding-right: 6px;  /* espacio scroll vertical */
 }
+
+.apps-section {
+  max-width: 1100px;
+  margin: 0 auto;
+
+  max-height: calc(100vh - 260px); /* header + categorías */
+  overflow-y: auto;
+  overflow-x: auto;
+
+  padding-right: 6px;
+}
+
+
 .apps-grid > * {
   cursor: pointer;
 }
