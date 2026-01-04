@@ -90,6 +90,11 @@ body {
   border-bottom: 1px solid rgba(31, 41, 55, 0.9);
   background: radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 58%), #020617;
 }
+.categories-bar {
+  position: sticky;
+  top: 72px; /* debajo del header */
+  z-index: 15;
+}
 
 .chip {
   border-radius: 8px;
