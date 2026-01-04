@@ -1,0 +1,426 @@
+/* ===== ESTILOS ESPECÍFICOS PARA PÁGINA DE DETALLES ===== */
+
+/* Reset y estructura básica */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #020617;
+  color: #e5e7eb;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+html, body {
+  height: 100%;
+}
+
+/* HEADER (igual que en index pero necesario aquí también) */
+.store-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  backdrop-filter: blur(12px);
+  background: linear-gradient(to right, rgba(15,23,42,0.96), rgba(15,23,42,0.92));
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+  padding: 10px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #0b1120;
+  cursor: pointer;
+}
+
+.brand h1 {
+  font-size: 4rem;
+  font-weight: 600;
+}
+
+.brand-tagline {
+  font-size: 1rem;
+  color: #9ca3af;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: #020617;
+  border-radius: 8px;
+  padding: 6px 10px;
+  border: 1px solid rgba(75, 85, 99, 0.8);
+  min-width: 220px;
+}
+
+.search-box .icon {
+  font-size: 0.85rem;
+  opacity: 0.8;
+}
+
+.search-box input {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: #e5e7eb;
+  font-size: 0.85rem;
+  width: 100%;
+}
+
+/* CATEGORÍAS */
+.categories-bar {
+  padding: 8px 18px 4px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+  background: radial-gradient(circle at top left, rgba(56,189,248,0.16), transparent 58%), #020617;
+}
+
+.chip {
+  border-radius: 8px;
+  padding: 5px 12px;
+  font-size: 0.9rem;
+  border: 1px solid rgba(75,85,99,0.9);
+  background: rgba(15,23,42,0.9);
+  color: #cbd5f5;
+  cursor: pointer;
+  transition: 0.15s ease;
+}
+.chip:hover {
+  border-color: rgba(59,130,246,0.9);
+}
+.chip.active {
+  background: linear-gradient(to right, #2563eb, #4f46e5);
+  border-color: transparent;
+  color: white;
+}
+
+/* MAIN CONTENT */
+.store-main {
+  padding: 20px;
+  flex: 1;
+}
+
+#detailOverlay {
+  display: block !important;
+  position: relative;
+  background: transparent;
+  z-index: 1;
+  margin: 0 auto;
+  max-width: 1200px;
+}
+
+.overlay-backdrop {
+  display: none;
+}
+
+.overlay-panel {
+  position: relative;
+  margin: 20px auto;
+  top: 0;
+  left: 0;
+  transform: none;
+  max-width: 100%;
+  width: auto;
+  min-height: auto;
+  max-height: none;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  background: #020617;
+  border: 1px solid rgba(75,85,99,0.9);
+  color: #e5e7eb;
+  padding: 18px;
+}
+
+.overlay-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(15,23,42,0.9);
+  border: 1px solid rgba(75,85,99,0.8);
+  color: #e5e7eb;
+  z-index: 100;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+
+.overlay-close:hover {
+  background: rgba(59,130,246,0.2);
+  border-color: rgba(59,130,246,0.9);
+}
+
+/* Contenido del detalle */
+.overlay-header {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.overlay-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 22px;
+  object-fit: cover;
+  background: #0b1120;
+}
+
+/* Botones de instalación */
+.install-share-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+  align-items: center;
+}
+
+.install-share-row button {
+  aspect-ratio: 1890/709;
+  width: 100px;
+  padding: 0;
+  border: 2px solid rgba(255,255,255,0.8);
+  border-radius: 12px;
+  overflow: hidden;
+  background: transparent;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.install-share-row button:hover {
+  transform: scale(1.05);
+  border-color: rgba(59,130,246,0.9);
+}
+
+.install-share-row button img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Info grid */
+.info-grid {
+  margin: 18px 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.info-box {
+  background: rgba(255,255,255,0.04);
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(75,85,99,0.4);
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  column-gap: 10px;
+  align-items: center;
+}
+
+.info-icon {
+  font-size: 1.6rem;
+  color: #facc15;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cbd5f5;
+  margin-bottom: 2px;
+}
+
+.info-value {
+  font-size: 0.88rem;
+  color: #e5e7eb;
+}
+
+/* Screenshots */
+.screenshots-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  margin-top: 20px;
+  padding-bottom: 10px;
+}
+
+.screenshots-row img {
+  width: 220px;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 14px;
+  border: 1px solid rgba(75,85,99,0.5);
+}
+
+/* Gráfico de estrellas */
+.stars-graph {
+  display: flex;
+  gap: 20px;
+  margin: 15px 0;
+  align-items: center;
+}
+
+.stars-left {
+  text-align: center;
+  min-width: 90px;
+}
+
+.rating-big {
+  font-size: 3.2rem;
+  font-weight: 700;
+  color: #facc15;
+}
+
+.rating-total {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  margin-top: -4px;
+}
+
+.stars-bars {
+  flex: 1;
+}
+
+.bar-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.bar-row span {
+  width: 16px;
+  text-align: right;
+  font-size: 0.8rem;
+  color: #cbd5f5;
+}
+
+.bar {
+  flex: 1;
+  height: 10px;
+  background: rgba(148,163,184,0.2);
+  border-radius: 40px;
+}
+
+.bar-fill {
+  height: 100%;
+  background: #22c55e;
+  border-radius: 40px;
+  transition: width 0.4s ease;
+}
+
+/* Reseñas */
+.review-form {
+  background: rgba(255,255,255,0.04);
+  padding: 12px;
+  border-radius: 14px;
+  margin-bottom: 16px;
+  border: 1px solid rgba(75,85,99,0.5);
+}
+
+.review-form textarea {
+  width: 100%;
+  height: 80px;
+  padding: 10px;
+  background: #0f172a;
+  border: 1px solid rgba(148,163,184,0.6);
+  color: white;
+  border-radius: 10px;
+  resize: none;
+  font-size: 0.85rem;
+  margin-top: 8px;
+}
+
+.reviews-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.review-item {
+  background: rgba(255,255,255,0.05);
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(75,85,99,0.4);
+  margin-top: 14px;
+}
+
+/* Footer */
+.store-footer {
+  border-top: 1px solid rgba(31,41,55,0.9);
+  padding: 10px 18px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .store-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .header-right {
+    width: 100%;
+  }
+  .search-box {
+    flex: 1;
+  }
+  .store-main {
+    padding: 14px 12px 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .overlay-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .overlay-icon {
+    align-self: center;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .screenshots-row img {
+    width: 180px;
+    height: 320px;
+  }
+}
