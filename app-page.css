@@ -39,7 +39,7 @@
 }
 
 /* Header de la app */
-.overlay-header {
+.store-header {
   display: flex;
   gap: 25px;
   min-height: 120px;
