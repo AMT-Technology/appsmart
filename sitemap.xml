@@ -25,4 +25,12 @@
     <changefreq>weekly</changefreq>
   </url>
 
+   <!-- Tercera app (reemplaza CON-EL-SLUG-REAL con el slug de tu segunda app) -->
+  <url>
+    <loc>https://appsem.rap-infinite.online/app-detail.html?app=authpro</loc>
+    <lastmod>2026-01-05</lastmod>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
 </urlset>
