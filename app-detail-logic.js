@@ -402,8 +402,7 @@ function renderAppDetails(app) {
 // ====== Inicializar eventos ======
 function inicializarEventos(app) {
   // Botón de descarga principal
-  // Botón de like
-const likeBtn = document.getElementById('likeBtn');
+  const likeBtn = document.getElementById('likeBtn');
 if (likeBtn) {
 
   likeBtn.onclick = async () => {
@@ -422,10 +421,10 @@ if (likeBtn) {
       votes[app.id] = { liked: true };
       localStorage.setItem("appsmart_votes", JSON.stringify(votes));
 
-      // 🔥 ACTUALIZAR app.likes PARA QUE LA UI SEA CORRECTA
+      // 🔥 ACTUALIZAR app.likes
       app.likes = (app.likes || 0) + 1;
 
-      // 🔥 NO BORRAR CLASES NI ID, SOLO CAMBIAR TEXTO
+      // 🔥 Actualizar UI
       likeBtn.innerHTML = `❤️ Ya te gusta (${app.likes})`;
       likeBtn.disabled = true;
 
@@ -434,6 +433,9 @@ if (likeBtn) {
     }
   };
 }
+
+// ⬅️ ESTE CIERRE FALTABA
+} 
 
 
   // Botones extra
